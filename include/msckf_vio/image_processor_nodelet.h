@@ -13,13 +13,13 @@
 #include <msckf_vio/image_processor.h>
 
 namespace msckf_vio {
-class ImageProcessorNodelet : public nodelet::Nodelet {
+class ImageProcessorNodelet : public nodelet::Nodelet { //继承父类nodelet::Nodelet
 public:
   ImageProcessorNodelet() { return; }
   ~ImageProcessorNodelet() { return; }
 
 private:
-  virtual void onInit();
+  virtual void onInit(); // 重载虚函数，启动时自动调用
   ImageProcessorPtr img_processor_ptr;
 };
 } // end namespace msckf_vio

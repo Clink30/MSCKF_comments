@@ -203,7 +203,7 @@ bool MsckfVio::createRosIO()
     reset_srv = nh.advertiseService("reset", &MsckfVio::resetCallback, this);
 
     // 接收imu数据与前端跟踪的特征
-    imu_sub = nh.subscribe("imu", 100, &MsckfVio::imuCallback, this);
+    imu_sub = nh.subscribe("imu", 100, &MsckfVio::imuCallback, this);            // 订阅
     feature_sub = nh.subscribe("features", 40, &MsckfVio::featureCallback, this);
 
     // 接受真值，动作捕捉发来的
@@ -262,6 +262,7 @@ void MsckfVio::imuCallback(const sensor_msgs::ImuConstPtr &msg)
     imu_msg_buffer.push_back(*msg);
 
     // 2. 用200个imu数据做静止初始化，不够则不做
+    // TODO 动态初始化
     if (!is_gravity_set)
     {
 

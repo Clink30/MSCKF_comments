@@ -199,8 +199,10 @@ bool ImageProcessor::createRosIO()
 {
     // 1. 发布
     // 发布名为feature的消息，缓存长度为3
+    // CameraMeasurement 为自定义的消息类型
     feature_pub = nh.advertise<CameraMeasurement>("features", 3);
-    // 发布名为tracking_info的消息，缓存长度为1    
+    // 发布名为tracking_info的消息，缓存长度为1  
+    // TrackingInfo 也为自定义的消息类型  
     tracking_info_pub = nh.advertise<TrackingInfo>("tracking_info", 1);
 
     // 发布名为debug_stereo_image的消息，缓存长度为1
@@ -212,7 +214,8 @@ bool ImageProcessor::createRosIO()
     cam0_img_sub.subscribe(nh, "cam0_image", 10);
     cam1_img_sub.subscribe(nh, "cam1_image", 10);
     // 将双目的两帧图像消息结合起来，ros自带
-    stereo_sub.connectInput(cam0_img_sub, cam1_img_sub);
+    // stereo_sub 是 TimeSynchronizer 类型
+    stereo_sub.connectInput(cam0_img_sub, cam1_img_sub); 
     // callback
     stereo_sub.registerCallback(&ImageProcessor::stereoCallback, this);
     // imu的接收函数
@@ -447,6 +450,7 @@ void ImageProcessor::initializeFirstFrame()
         cam0_inliers.push_back(cam0_points[i]);
         cam1_inliers.push_back(cam1_points[i]);
         // 响应程度，代表该点强壮大小，即该点是特征点的程度，用白话说就是值越大这个点看起来更像是角点
+        // TAG:response 是在vector<KeyPoint>类型中包含的类型
         response_inliers.push_back(new_features[i].response);
     }
 
@@ -764,6 +768,8 @@ void ImageProcessor::trackFeatures()
  * @param  inlier_markers 内点
  * @see ImageProcessor::addNewFeatures()  ImageProcessor::trackFeatures()  ImageProcessor::initializeFirstFrame()
  */
+
+// 在cam1中找到cam0追踪的特征点
 void ImageProcessor::stereoMatch(
     const vector<cv::Point2f> &cam0_points, vector<cv::Point2f> &cam1_points, vector<unsigned char> &inlier_markers)
 {
@@ -821,6 +827,7 @@ void ImageProcessor::stereoMatch(
     const cv::Vec3d t_cam0_cam1 = R_cam1_imu.t() * (t_cam0_imu - t_cam1_imu);
     // Compute the essential matrix.
     // 4. 计算本质矩阵  [t]x * R
+    // 本质矩阵计算方法
     const cv::Matx33d t_cam0_cam1_hat(
         0.0, -t_cam0_cam1[2], t_cam0_cam1[1],
         t_cam0_cam1[2], 0.0, -t_cam0_cam1[0],
